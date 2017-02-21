@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 Freescale Semiconductor, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +159,7 @@ SoftAVCEncoder::SoftAVCEncoder(
     : SoftVideoEncoderOMXComponent(
             name, "video_encoder.avc", OMX_VIDEO_CodingAVC,
             kProfileLevels, NELEM(kProfileLevels),
-            176 /* width */, 144 /* height */,
+            320 /* width */, 240 /* height */,
             callbacks, appData, component),
       mIDRFrameRefreshIntervalInSec(1),
       mAVCEncProfile(AVC_BASELINE),
@@ -611,8 +612,18 @@ void SoftAVCEncoder::onQueueFilled(OMX_U32 /* portIndex */) {
                         return;
                     } else {
                         ALOGV("encoderStatus = %d at line %d", encoderStatus, __LINE__);
+
+                       //If skip this frame, del mInputBufferInfoVec,
+                       //or will cause video time stamp drift, and memory leakage
+                       if(AVCENC_SKIPPED_PICTURE == encoderStatus) {
+                           CHECK(!mInputBufferInfoVec.empty());
+                           mInputBufferInfoVec.erase(mInputBufferInfoVec.end() - 1);
+                       }
+
                         inQueue.erase(inQueue.begin());
                         inInfo->mOwnedByUs = false;
+
+                        //inHeader->nFlags = OMX_BUFFERFLAG_FRAMEDROP;
                         notifyEmptyBufferDone(inHeader);
                         return;
                     }
@@ -661,6 +672,7 @@ void SoftAVCEncoder::onQueueFilled(OMX_U32 /* portIndex */) {
 
         inQueue.erase(inQueue.begin());
         inInfo->mOwnedByUs = false;
+        inHeader->nFlags = 0;
         notifyEmptyBufferDone(inHeader);
 
         outQueue.erase(outQueue.begin());
