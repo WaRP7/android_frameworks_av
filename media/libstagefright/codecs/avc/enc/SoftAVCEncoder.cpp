@@ -70,7 +70,7 @@ static LevelConversion ConversionTable[] = {
     { OMX_VIDEO_AVCLevel12, AVC_LEVEL1_2, 396 },
     { OMX_VIDEO_AVCLevel13, AVC_LEVEL1_3, 396 },
     { OMX_VIDEO_AVCLevel2,  AVC_LEVEL2,   396 },
-#if 0
+#if 1
     // encoding speed is very poor if video resolution
     // is higher than CIF or if level is higher than 2
     { OMX_VIDEO_AVCLevel21, AVC_LEVEL2_1, 792 },
@@ -162,7 +162,7 @@ SoftAVCEncoder::SoftAVCEncoder(
             callbacks, appData, component),
       mIDRFrameRefreshIntervalInSec(1),
       mAVCEncProfile(AVC_BASELINE),
-      mAVCEncLevel(AVC_LEVEL2),
+      mAVCEncLevel(AVC_LEVEL3),
       mNumInputFrames(-1),
       mPrevTimestampUs(-1),
       mStarted(false),
